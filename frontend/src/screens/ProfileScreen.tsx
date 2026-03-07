@@ -129,7 +129,7 @@ export const ProfileScreen: React.FC = () => {
 
             <Text style={[styles.userName, dynamicStyles.text]}>{user.nom}</Text>
             <Text style={[styles.userEmail, dynamicStyles.textMuted]}>{user.email}</Text>
-            
+
             <View style={styles.tag}>
               <Text style={styles.tagText}>CLIENT PRIVILÈGE</Text>
             </View>
@@ -188,8 +188,6 @@ export const ProfileScreen: React.FC = () => {
               <Ionicons name="chevron-forward" size={16} color={theme.textMuted} />
             </TouchableOpacity>
           </View>
-
-          <Text style={styles.versionText}>Version 1.2.0 • VenotFinance Secure</Text>
         </View>
       </ScrollView>
     </View>
@@ -199,11 +197,11 @@ export const ProfileScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Brand.slate50 },
   scrollContent: { paddingBottom: 110 },
-  headerBackground: { 
+  headerBackground: {
     paddingTop: Platform.OS === 'ios' ? 20 : 40,
-    paddingBottom: 80, 
-    borderBottomLeftRadius: 40, 
-    borderBottomRightRadius: 40 
+    paddingBottom: 80,
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40
   },
   headerTop: {
     flexDirection: 'row',
@@ -242,8 +240,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15, shadowRadius: 15,
   },
   avatarImage: { width: '100%', height: '100%' },
-  avatarPlaceholder: { 
-    width: '100%', height: '100%', 
+  avatarPlaceholder: {
+    width: '100%', height: '100%',
     backgroundColor: Brand.emerald50,
     justifyContent: 'center', alignItems: 'center',
   },

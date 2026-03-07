@@ -1,5 +1,5 @@
-import React, { useContext, useState } from 'react';
-import { View, StyleSheet, SafeAreaView, Text, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useContext, useState, useEffect, useRef } from 'react';
+import { View, StyleSheet, SafeAreaView, Text, TouchableOpacity, ScrollView, Animated } from 'react-native';
 import { PretList } from '../components/PretList';
 import { PretForm } from '../components/PretForm';
 import { PretContext } from '../context/PretContext';
@@ -13,6 +13,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 export const ListScreen: React.FC = () => {
   const { prets, deletePret, addPret, updatePret, loading, error } = useContext(PretContext);
   const { theme, isDarkMode } = useTheme();
+  const screenFadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(screenFadeAnim, {
+      toValue: 1,
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
+  }, []);
 
   const [isFormModalVisible, setFormModalVisible] = useState(false);
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -66,12 +75,12 @@ export const ListScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.content}>
+      <Animated.View style={[styles.content, { opacity: screenFadeAnim }]}>
         <View style={styles.header}>
           <View>
             <Text style={[styles.title, { color: theme.textPrimary }]}>Portefeuille</Text>
             <View style={styles.subtitleRow}>
-              <View style={[styles.countBadge, { backgroundColor: theme.primaryLight }]}>
+              <View style={[styles.countBadge, { backgroundColor: isDarkMode ? 'rgba(16, 185, 129, 0.15)' : theme.primaryLight }]}>
                 <Text style={[styles.countText, { color: theme.primary }]}>{prets.length}</Text>
               </View>
               <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Prêts actifs</Text>
@@ -93,15 +102,6 @@ export const ListScreen: React.FC = () => {
           onDelete={handleOpenDelete} 
         />
 
-        {/* Floating Action Button */}
-        <TouchableOpacity style={[styles.fab, { shadowColor: theme.primary }]} onPress={handleOpenAdd} activeOpacity={0.9}>
-          <LinearGradient
-            colors={[theme.primary, theme.primaryDark]}
-            style={styles.fabGradient}
-          >
-            <Ionicons name="add" size={32} color="#fff" />
-          </LinearGradient>
-        </TouchableOpacity>
 
         {/* Form Modal (Add / Edit) */}
         <CustomModal visible={isFormModalVisible} onClose={handleCancelForm}>
@@ -131,7 +131,7 @@ export const ListScreen: React.FC = () => {
             </View>
           </View>
         </CustomModal>
-      </View>
+      </Animated.View>
     </SafeAreaView>
   );
 };
@@ -143,9 +143,9 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 90,
+    paddingHorizontal: 16, // Slightly reduced
+    paddingTop: 10, // Reduced
+    paddingBottom: 20,
   },
   header: {
     flexDirection: 'row',
@@ -154,10 +154,10 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   title: {
-    fontSize: 32,
+    fontSize: 28, // More compact
     fontWeight: '900',
     color: Brand.slate900,
-    letterSpacing: -1,
+    letterSpacing: -0.8,
   },
   subtitleRow: {
     flexDirection: 'row',
@@ -192,23 +192,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 110,
-    right: 24,
-    shadowColor: Brand.emerald500,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 15,
-    elevation: 10,
-  },
-  fabGradient: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
   },

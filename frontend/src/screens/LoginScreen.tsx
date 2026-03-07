@@ -49,7 +49,7 @@ export const LoginScreen: React.FC<Props> = ({ onGoToRegister }) => {
                   <Ionicons name="business" size={44} color="#fff" />
                 </LinearGradient>
               </View>
-              <Text style={styles.appName}>VenotFinance</Text>
+              <Text style={styles.appName}>Finance</Text>
               <View style={styles.taglineBadge}>
                 <Text style={styles.tagline}>Gérez vos intérêts avec clarté</Text>
               </View>

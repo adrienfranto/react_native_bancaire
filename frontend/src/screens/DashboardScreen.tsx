@@ -1,10 +1,10 @@
-import React, { useContext } from 'react';
-import { View, StyleSheet, SafeAreaView, Text, TouchableOpacity, Image, Platform, ScrollView } from 'react-native';
+import React, { useContext, useEffect, useRef } from 'react';
+import { View, StyleSheet, SafeAreaView, Text, TouchableOpacity, Image, Platform, ScrollView, Animated } from 'react-native';
 import { calculateTotals } from '../utils/calculations';
 import { PretContext } from '../context/PretContext';
 import { Ionicons } from '@expo/vector-icons';
 import { DashboardChart } from '../components/DashboardChart';
-import { Colors, Brand, LightTheme, DarkTheme } from '../theme/colors';
+import { Brand, LightTheme, DarkTheme } from '../theme/colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -15,11 +15,57 @@ export const DashboardScreen: React.FC = () => {
   const { user } = useAuth();
   const { isDarkMode, theme } = useTheme();
 
+  const isWeb = Platform.OS === 'web';
+  const fadeAnim = useRef(new Animated.Value(isWeb ? 1 : 0)).current;
+  const slideAnim = useRef(new Animated.Value(isWeb ? 0 : 15)).current;
+  const scaleAnim = useRef(new Animated.Value(isWeb ? 1 : 0.95)).current;
+  const chartFadeAnim = useRef(new Animated.Value(isWeb ? 1 : 0)).current;
+
+  useEffect(() => {
+    if (isWeb) return; // Skip animations on web for instant visibility
+
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+      Animated.timing(chartFadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [fadeAnim, slideAnim, scaleAnim, chartFadeAnim, isWeb]);
+
   if (loading) {
     return (
       <View style={[styles.center, { backgroundColor: theme.background }]}>
         <ActivityIndicator size="large" color={theme.primary} />
         <Text style={[styles.loadingText, { color: theme.textSecondary }]}>Chargement de vos finances...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.center, { backgroundColor: theme.background, padding: 20 }]}>
+        <Ionicons name="cloud-offline-outline" size={60} color={theme.danger} />
+        <Text style={[styles.errorTitle, { color: theme.textPrimary }]}>Erreur de connexion</Text>
+        <Text style={[styles.errorText, { color: theme.textSecondary }]}>{error}</Text>
+        <TouchableOpacity style={[styles.retryBtn, { backgroundColor: theme.primary }]} onPress={() => window.location.reload()}>
+          <Text style={styles.retryText}>Réessayer</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -38,13 +84,15 @@ export const DashboardScreen: React.FC = () => {
   return (
     <View style={[styles.container, dynamicStyles.container]}>
       <LinearGradient
-        colors={[theme.gradientStart, theme.gradientEnd]}
+        colors={[theme.gradientStart, theme.primary, theme.gradientEnd]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
         style={styles.headerBackground}
       >
         <SafeAreaView>
           <View style={styles.headerContent}>
             <View>
-              <Text style={[styles.greeting, { color: isDarkMode ? '#fff' : '#fff' }]}>Bonjour, {user?.nom.split(' ')[0] || 'Adrien'}</Text>
+              <Text style={[styles.greeting, { color: isDarkMode ? '#fff' : '#fff' }]}>Bienvenue, {user?.nom.split(' ')[0] || 'Adrien'}</Text>
               <View style={styles.statusRow}>
                 <View style={[styles.statusDot, { backgroundColor: isDarkMode ? Brand.emerald500 : Brand.emerald500 }]} />
                 <Text style={styles.subtitle}>Votre santé financière est stable</Text>
@@ -57,26 +105,59 @@ export const DashboardScreen: React.FC = () => {
                   style={styles.avatar} 
                 />
               ) : (
-                <View style={styles.avatarPlaceholder}>
-                  <Ionicons name="person" size={24} color={Colors.primary} />
+                <View style={[styles.avatarPlaceholder, { backgroundColor: theme.primaryLight }]}>
+                  <Ionicons name="person" size={24} color={theme.primary} />
                 </View>
               )}
             </TouchableOpacity>
           </View>
 
-          {/* Balance Card Overlap */}
-          <View style={styles.balanceCard}>
-            <View style={styles.balanceInfo}>
-              <Text style={styles.balanceLabel}>Total des dettes</Text>
-              <Text style={styles.balanceValue}>{total.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €</Text>
+          {/* Balance Card Overlap - No animation for web for stability */}
+          {isWeb ? (
+            <View style={[
+              styles.balanceCard,
+              {
+                backgroundColor: isDarkMode ? 'rgba(16, 185, 129, 0.25)' : 'rgba(16, 185, 129, 0.95)',
+                borderColor: isDarkMode ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.6)',
+                bottom: -40,
+              }
+            ]}>
+              <View style={styles.balanceInfo}>
+                <Text style={styles.balanceLabel}>Total des dettes</Text>
+                <Text style={styles.balanceValue}>{total.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €</Text>
+              </View>
+              <View style={styles.balanceAction}>
+                <TouchableOpacity style={styles.detailsBtn}>
+                  <Text style={styles.detailsBtnText}>Détails</Text>
+                  <Ionicons name="chevron-forward" size={12} color="#fff" />
+                </TouchableOpacity>
+              </View>
             </View>
-            <View style={styles.balanceAction}>
-              <TouchableOpacity style={styles.detailsBtn}>
-                <Text style={styles.detailsBtnText}>Détails</Text>
-                <Ionicons name="chevron-forward" size={12} color="#fff" />
-              </TouchableOpacity>
-            </View>
-          </View>
+          ) : (
+            <Animated.View style={[
+              styles.balanceCard,
+              {
+                opacity: fadeAnim,
+                transform: [
+                  { translateY: slideAnim },
+                  { scale: scaleAnim }
+                ],
+                backgroundColor: isDarkMode ? 'rgba(16, 185, 129, 0.25)' : 'rgba(16, 185, 129, 0.85)',
+                borderColor: isDarkMode ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.4)',
+              }
+            ]}>
+              <View style={styles.balanceInfo}>
+                <Text style={styles.balanceLabel}>Total des dettes</Text>
+                <Text style={styles.balanceValue}>{total.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €</Text>
+              </View>
+              <View style={styles.balanceAction}>
+                <TouchableOpacity style={styles.detailsBtn}>
+                  <Text style={styles.detailsBtnText}>Détails</Text>
+                  <Ionicons name="chevron-forward" size={12} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+          )}
         </SafeAreaView>
       </LinearGradient>
 
@@ -88,7 +169,7 @@ export const DashboardScreen: React.FC = () => {
           {prets.length === 0 ? (
             <View style={[styles.emptyState, dynamicStyles.card]}>
               <View style={styles.emptyIconCircle}>
-                <Ionicons name="analytics-outline" size={48} color={isDarkMode ? Brand.emerald500 : Colors.primary} />
+                <Ionicons name="analytics-outline" size={48} color={isDarkMode ? Brand.emerald500 : theme.primary} />
               </View>
               <Text style={[styles.emptyTitle, dynamicStyles.text]}>Démarrer votre gestion</Text>
               <Text style={[styles.emptyText, dynamicStyles.textMuted]}>Ajoutez vos premiers prêts bancaires pour visualiser vos analyses financières en temps réel.</Text>
@@ -97,19 +178,16 @@ export const DashboardScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
           ) : (
-            <DashboardChart total={total} min={min} max={max} />
+            isWeb ? (
+              <DashboardChart total={total} min={min} max={max} />
+            ) : (
+              <Animated.View style={{ opacity: chartFadeAnim }}>
+                <DashboardChart total={total} min={min} max={max} />
+              </Animated.View>
+            )
           )}
 
-          {/* Additional Insight Card */}
-          <View style={[styles.insightCard, dynamicStyles.card, dynamicStyles.border]}>
-            <View style={[styles.insightIcon, { backgroundColor: theme.warningLight }]}>
-              <Ionicons name="bulb-outline" size={20} color={theme.warning} />
-            </View>
-            <View style={styles.insightText}>
-              <Text style={[styles.insightTitle, dynamicStyles.text]}>Conseil du jour</Text>
-              <Text style={[styles.insightDesc, dynamicStyles.textMuted]}>Rembourser les prêts avec un taux supérieur à 4% en priorité pour réduire vos intérêts totaux.</Text>
-            </View>
-          </View>
+          
         </View>
       </ScrollView>
     </View>
@@ -121,20 +199,43 @@ export const DashboardScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.slate100,
+    backgroundColor: Brand.slate50,
   },
   headerBackground: {
-    paddingTop: Platform.OS === 'ios' ? 20 : 40,
-    paddingBottom: 110, // Reduced from 150 for better spacing
+    paddingTop: Platform.OS === 'ios' ? 10 : 30,
+    paddingBottom: 30, // Reduced significantly as card is now inside
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
+    position: 'relative',
+    zIndex: 10,
+  },
+  content: {
+    padding: 16,
+    paddingTop: 8,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    paddingHorizontal: 4,
   },
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 28,
-    marginBottom: 30, // Reduced from 60 for compactness
+    marginBottom: 20, // Reduced space,
+    
+  },
+  welcomeText: {
+    fontSize: 14,
+    opacity: 0.8,
+  },
+  userName: {
+    fontSize: 22,
+    fontWeight: '900',
+    letterSpacing: -0.5,
   },
   greeting: {
     fontSize: 34,
@@ -152,7 +253,7 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: Colors.primary,
+    backgroundColor: Brand.emerald500,
     borderWidth: 2,
     borderColor: 'rgba(255,255,255,0.3)',
   },
@@ -177,25 +278,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
   },
   balanceCard: {
-    backgroundColor: 'rgba(16, 185, 129, 0.9)', // Glass Emerald stronger
+    backgroundColor: 'rgba(16, 185, 129, 0.9)', 
     marginHorizontal: 20,
     borderRadius: 30,
     padding: 24,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    shadowColor: Colors.slate900,
+    shadowColor: Brand.slate900,
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.3,
     shadowRadius: 24,
     elevation: 15,
-    position: 'absolute',
-    bottom: -90,// Deep positioning
-    marginTop: 100,
-    left: 0,
-    right: 0,
-    borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.3)',
+    zIndex: 20,
+   top: 10 // Added margin to separate from status text
   },
   balanceInfo: {
     
@@ -229,8 +326,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   scrollContent: {
-    paddingTop: 60, // Adjusted from 100 for more compact header
+    paddingTop: 20, // Reduced as there is no overlap
     paddingBottom: 110,
+    zIndex: 1,
   },
   mainContent: {
     paddingHorizontal: 20,
@@ -242,7 +340,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
-    shadowColor: Colors.slate900,
+    shadowColor: Brand.slate900,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 15,
@@ -252,7 +350,7 @@ const styles = StyleSheet.create({
     width: 90,
     height: 90,
     borderRadius: 45,
-    backgroundColor: Colors.primaryLight,
+    backgroundColor: Brand.emerald50,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
@@ -260,19 +358,19 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: '900',
-    color: Colors.textPrimary,
+    color: Brand.slate900,
     marginBottom: 10,
   },
   emptyText: {
     fontSize: 14,
-    color: Colors.slate500,
+    color: Brand.slate400,
     textAlign: 'center',
     lineHeight: 22,
     paddingHorizontal: 10,
     marginBottom: 24,
   },
   emptyActionBtn: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Brand.emerald500,
     paddingHorizontal: 24,
     paddingVertical: 14,
     borderRadius: 14,
@@ -290,13 +388,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 16,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Brand.slate200,
   },
   insightIcon: {
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: Colors.warningLight,
+    backgroundColor: Brand.emerald50,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -304,15 +402,19 @@ const styles = StyleSheet.create({
   insightTitle: {
     fontSize: 15,
     fontWeight: '800',
-    color: Colors.textPrimary,
+    color: Brand.slate900,
     marginBottom: 4,
   },
   insightDesc: {
     fontSize: 13,
-    color: Colors.slate500,
+    color: Brand.slate500,
     lineHeight: 18,
     fontWeight: '500',
   },
+  errorTitle: { fontSize: 22, fontWeight: '900', marginTop: 16, marginBottom: 8 },
+  errorText: { fontSize: 14, textAlign: 'center', marginBottom: 24, lineHeight: 20 },
+  retryBtn: { paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 },
+  retryText: { color: '#fff', fontWeight: '800' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  loadingText: { marginTop: 16, color: Colors.slate500, fontWeight: '600' },
+  loadingText: { marginTop: 16, color: Brand.slate500, fontWeight: '600' },
 });

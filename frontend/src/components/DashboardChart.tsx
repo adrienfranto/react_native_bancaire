@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Platform } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
 import { Ionicons } from '@expo/vector-icons';
 import { Brand } from '../theme/colors';
@@ -17,14 +17,16 @@ interface KpiCardProps {
   icon: React.ComponentProps<typeof Ionicons>['name'];
   color: string;
   bgColor: string;
+  isDarkMode: boolean;
+  theme: any;
 }
 
-const KpiCard: React.FC<KpiCardProps> = ({ label, value, icon, color, bgColor }) => (
-  <View style={styles.kpiCard}>
+const KpiCard: React.FC<KpiCardProps> = ({ label, value, icon, color, bgColor, isDarkMode, theme }) => (
+  <View style={[styles.kpiCard, { borderColor: isDarkMode ? 'rgba(255,255,255,0.1)' : Brand.slate200 }]}>
     <View style={[styles.kpiIcon, { backgroundColor: bgColor, shadowColor: color }]}>
       <Ionicons name={icon} size={20} color={color} />
     </View>
-    <Text style={styles.kpiLabel}>{label}</Text>
+    <Text style={[styles.kpiLabel, { color: isDarkMode ? theme.textMuted : Brand.slate500 }]}>{label}</Text>
     <Text style={[styles.kpiValue, { color }]}>{value}</Text>
   </View>
 );
@@ -86,6 +88,8 @@ export const DashboardChart: React.FC<Props> = ({ total, min, max }) => {
           icon="trending-up"
           color={theme.accent}
           bgColor={theme.accentLight}
+          isDarkMode={isDarkMode}
+          theme={theme}
         />
         <KpiCard
           label="Minimal"
@@ -93,6 +97,8 @@ export const DashboardChart: React.FC<Props> = ({ total, min, max }) => {
           icon="arrow-down-circle"
           color={Brand.emerald500}
           bgColor={isDarkMode ? 'rgba(16, 185, 129, 0.15)' : 'rgba(16, 185, 129, 0.1)'}
+          isDarkMode={isDarkMode}
+          theme={theme}
         />
         <KpiCard
           label="Maximal"
@@ -100,6 +106,8 @@ export const DashboardChart: React.FC<Props> = ({ total, min, max }) => {
           icon="arrow-up-circle"
           color={theme.danger}
           bgColor={theme.dangerLight}
+          isDarkMode={isDarkMode}
+          theme={theme}
         />
       </View>
 
@@ -108,8 +116,8 @@ export const DashboardChart: React.FC<Props> = ({ total, min, max }) => {
         <View style={styles.chartContainer}>
           <PieChart
             data={data}
-            width={Dimensions.get('window').width - 64}
-            height={140}
+            width={Platform.OS === 'web' ? 400 : Dimensions.get('window').width - 64}
+            height={160}
             chartConfig={chartConfig}
             accessor="population"
             backgroundColor="transparent"
@@ -126,24 +134,26 @@ export const DashboardChart: React.FC<Props> = ({ total, min, max }) => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: Brand.slate50,
-    borderRadius: 24,
-    padding: 20,
-    marginTop: 8,
+    borderRadius: 20,
+    padding: 16,
+    marginTop: 4,
     shadowColor: Brand.slate900,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.06,
-    shadowRadius: 20,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.05,
+    shadowRadius: 15,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: Brand.slate200,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '800',
+    fontSize: 16, // Slightly larger
+    fontWeight: '900',
     color: Brand.slate900,
     letterSpacing: -0.3,
   },
@@ -163,13 +173,13 @@ const styles = StyleSheet.create({
   },
   kpiRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
     marginBottom: 0,
   },
   kpiCard: {
     flex: 1,
-    borderRadius: 18,
-    padding: 12,
+    borderRadius: 14,
+    padding: 10,
     alignItems: 'flex-start',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -180,29 +190,30 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   kpiIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
+    width: 28,
+    height: 28,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   kpiLabel: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: '800',
     color: Brand.slate400,
     textTransform: 'uppercase',
     letterSpacing: 0.6,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   kpiValue: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '900',
     letterSpacing: -0.4,
   },
   chartContainer: {
-    marginTop: 10,
+    marginTop: 8,
     alignItems: 'center',
     justifyContent: 'center',
+    transform: [{ scale: 0.95 }], // Slightly smaller chart
   },
 });
