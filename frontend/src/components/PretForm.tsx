@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, Platform, ScrollView } from 'react-native';
 import { PretBancaire, PretBancaireCreate } from '../models/Pret';
 import { Ionicons } from '@expo/vector-icons';
+import { Brand } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 
 interface Props {
   onAdd: (pret: PretBancaireCreate) => void;
@@ -10,7 +12,27 @@ interface Props {
   onCancelEdit: () => void;
 }
 
+interface FieldProps {
+  label: string;
+  icon: React.ComponentProps<typeof Ionicons>['name'];
+  children: React.ReactNode;
+}
+
+const FormField: React.FC<FieldProps> = ({ label, icon, children }) => {
+  const { theme } = useTheme();
+  return (
+    <View style={styles.inputGroup}>
+      <View style={styles.labelRow}>
+        <Ionicons name={icon} size={14} color={theme.primary} style={{ marginRight: 6 }} />
+        <Text style={[styles.label, { color: theme.textSecondary }]}>{label}</Text>
+      </View>
+      {children}
+    </View>
+  );
+};
+
 export const PretForm: React.FC<Props> = ({ onAdd, onUpdate, pretToEdit, onCancelEdit }) => {
+  const { theme, isDarkMode } = useTheme();
   const [nCompte, setNCompte] = useState('');
   const [nomClient, setNomClient] = useState('');
   const [nomBanque, setNomBanque] = useState('');
@@ -36,7 +58,7 @@ export const PretForm: React.FC<Props> = ({ onAdd, onUpdate, pretToEdit, onCance
     setNomClient('');
     setNomBanque('');
     setMontant('');
-    setDatePret(new Date().toISOString().split('T')[0]); // Default to today in YYYY-MM-DD
+    setDatePret(new Date().toISOString().split('T')[0]);
     setTauxPret('');
   };
 
@@ -64,194 +86,193 @@ export const PretForm: React.FC<Props> = ({ onAdd, onUpdate, pretToEdit, onCance
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Ionicons 
-          name={pretToEdit ? "create-outline" : "add-circle-outline"} 
-          size={28} 
-          color="#1a1a1a" 
-          style={{ marginRight: 8 }} 
-        />
-        <Text style={styles.headerTitle}>
-          {pretToEdit ? 'Modifier le Prêt' : 'Nouveau Prêt'}
-        </Text>
-      </View>
-      
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>N° de Compte</Text>
-        <TextInput 
-          style={styles.input} 
-          placeholder="Ex: FR76 3000..." 
-          value={nCompte} 
-          onChangeText={setNCompte} 
-          placeholderTextColor="#999"
-        />
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Nom du Client</Text>
-        <TextInput 
-          style={styles.input} 
-          placeholder="Ex: Jean Dupont" 
-          value={nomClient} 
-          onChangeText={setNomClient} 
-          placeholderTextColor="#999"
-        />
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Établissement Bancaire</Text>
-        <TextInput 
-          style={styles.input} 
-          placeholder="Ex: BNP Paribas" 
-          value={nomBanque} 
-          onChangeText={setNomBanque} 
-          placeholderTextColor="#999"
-        />
-      </View>
-
-      <View style={styles.row}>
-        <View style={[styles.inputGroup, { flex: 1, marginRight: 15 }]}>
-          <Text style={styles.label}>Montant (€)</Text>
-          <TextInput 
-            style={styles.input} 
-            placeholder="Ex: 10000" 
-            keyboardType="numeric" 
-            value={montant} 
-            onChangeText={setMontant} 
-            placeholderTextColor="#999"
-          />
+    <ScrollView showsVerticalScrollIndicator={false}>
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.headerContainer}>
+          <View style={[styles.headerIcon, { backgroundColor: theme.primaryLight }]}>
+            <Ionicons
+              name={pretToEdit ? 'create-outline' : 'add-circle-outline'}
+              size={22}
+              color={theme.primary}
+            />
+          </View>
+          <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>
+            {pretToEdit ? 'Modifier le prêt' : 'Nouveau prêt'}
+          </Text>
         </View>
 
-        <View style={[styles.inputGroup, { flex: 1 }]}>
-          <Text style={styles.label}>Taux (ex: 0.05)</Text>
-          <TextInput 
-            style={styles.input} 
-            placeholder="0.05" 
-            keyboardType="numeric" 
-            value={tauxPret} 
-            onChangeText={setTauxPret} 
-            placeholderTextColor="#999"
+        <FormField label="N° de Compte" icon="card-outline">
+          <TextInput
+            style={[styles.input, { backgroundColor: theme.backgroundAlt, borderColor: theme.border, color: theme.textPrimary }]}
+            placeholder="Ex: FR76 3000..."
+            value={nCompte}
+            onChangeText={setNCompte}
+            placeholderTextColor={theme.textLight}
           />
+        </FormField>
+
+        <FormField label="Nom du Client" icon="person-outline">
+          <TextInput
+            style={[styles.input, { backgroundColor: theme.backgroundAlt, borderColor: theme.border, color: theme.textPrimary }]}
+            placeholder="Ex: Jean Dupont"
+            value={nomClient}
+            onChangeText={setNomClient}
+            placeholderTextColor={theme.textLight}
+          />
+        </FormField>
+
+        <FormField label="Établissement Bancaire" icon="business-outline">
+          <TextInput
+            style={[styles.input, { backgroundColor: theme.backgroundAlt, borderColor: theme.border, color: theme.textPrimary }]}
+            placeholder="Ex: BNP Paribas"
+            value={nomBanque}
+            onChangeText={setNomBanque}
+            placeholderTextColor={theme.textLight}
+          />
+        </FormField>
+
+        <View style={styles.row}>
+          <View style={{ flex: 1, marginRight: 10 }}>
+            <FormField label="Montant (€)" icon="cash-outline">
+              <TextInput
+                style={[styles.input, { backgroundColor: theme.backgroundAlt, borderColor: theme.border, color: theme.textPrimary }]}
+                placeholder="10 000"
+                keyboardType="numeric"
+                value={montant}
+                onChangeText={setMontant}
+                placeholderTextColor={theme.textLight}
+              />
+            </FormField>
+          </View>
+          <View style={{ flex: 1 }}>
+            <FormField label="Taux (ex: 0.05)" icon="trending-up-outline">
+              <TextInput
+                style={[styles.input, { backgroundColor: theme.backgroundAlt, borderColor: theme.border, color: theme.textPrimary }]}
+                placeholder="0.05"
+                keyboardType="numeric"
+                value={tauxPret}
+                onChangeText={setTauxPret}
+                placeholderTextColor={theme.textLight}
+              />
+            </FormField>
+          </View>
         </View>
-      </View>
 
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Date du prêt</Text>
-        {Platform.OS === 'web' ? (
-          <input
-            type="date"
-            style={{
-              borderWidth: 1,
-              borderColor: '#e0e0e0',
-              backgroundColor: '#F9FAFB',
-              padding: '14px',
-              borderRadius: '12px',
-              fontSize: '16px',
-              color: '#333',
-              width: '100%',
-              boxSizing: 'border-box',
-              outline: 'none',
-              fontFamily: 'inherit'
-            }}
-            value={datePret}
-            onChange={(e) => setDatePret(e.target.value)}
-          />
-        ) : (
-          <TextInput 
-            style={styles.input} 
-            placeholder="YYYY-MM-DD" 
-            value={datePret} 
-            onChangeText={setDatePret} 
-            placeholderTextColor="#999"
-          />
-        )}
-      </View>
-      
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
-          <Text style={styles.submitBtnText}>{pretToEdit ? "Mettre à jour" : "Ajouter le prêt"}</Text>
-        </TouchableOpacity>
+        <FormField label="Date du prêt" icon="calendar-outline">
+          {Platform.OS === 'web' ? (
+            <input
+              type="date"
+              style={{
+                border: `1.5px solid ${theme.border}`,
+                backgroundColor: theme.backgroundAlt,
+                padding: '13px 14px',
+                borderRadius: '14px',
+                fontSize: '16px',
+                color: theme.textPrimary,
+                width: '100%',
+                boxSizing: 'border-box',
+                outline: 'none',
+                fontFamily: 'inherit',
+              }}
+              value={datePret}
+              onChange={(e: any) => setDatePret(e.target.value)}
+            />
+          ) : (
+            <TextInput
+              style={[styles.input, { backgroundColor: theme.backgroundAlt, borderColor: theme.border, color: theme.textPrimary }]}
+              placeholder="YYYY-MM-DD"
+              value={datePret}
+              onChangeText={setDatePret}
+              placeholderTextColor={theme.textLight}
+            />
+          )}
+        </FormField>
 
-        {pretToEdit && (
-          <TouchableOpacity style={styles.cancelBtn} onPress={onCancelEdit}>
-            <Text style={styles.cancelBtnText}>Annuler</Text>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={[styles.submitBtn, { backgroundColor: theme.primary, shadowColor: theme.primary }]} onPress={handleSubmit}>
+            <Ionicons name={pretToEdit ? 'checkmark' : 'add'} size={20} color="#fff" style={{ marginRight: 8 }} />
+            <Text style={styles.submitBtnText}>{pretToEdit ? 'Mettre à jour' : 'Ajouter le prêt'}</Text>
           </TouchableOpacity>
-        )}
+
+          {pretToEdit && (
+            <TouchableOpacity style={[styles.cancelBtn, { backgroundColor: theme.backgroundAlt, borderColor: theme.border }]} onPress={onCancelEdit}>
+              <Text style={[styles.cancelBtnText, { color: theme.textSecondary }]}>Annuler</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 5,
-  },
+  container: { padding: 4 },
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: '#1a1a1a',
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  inputGroup: {
-    marginBottom: 15,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#555',
-    marginBottom: 6,
-    marginLeft: 4,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    backgroundColor: '#F9FAFB',
-    padding: 14,
-    borderRadius: 12,
-    fontSize: 16,
-    color: '#333',
-  },
-  buttonContainer: {
-    marginTop: 10,
+    marginBottom: 24,
     gap: 10,
   },
+  headerIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: Brand.emerald50,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: Brand.slate900,
+    letterSpacing: -0.3,
+  },
+  row: { flexDirection: 'row' },
+  inputGroup: { marginBottom: 16 },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: Brand.slate600,
+  },
+  input: {
+    borderWidth: 1.5,
+    borderColor: Brand.slate200,
+    backgroundColor: Brand.slate50,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    borderRadius: 14,
+    fontSize: 16,
+    color: Brand.slate900,
+  },
+  buttonContainer: { marginTop: 8, gap: 10 },
   submitBtn: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: Brand.emerald500,
     paddingVertical: 16,
-    borderRadius: 12,
+    borderRadius: 14,
     alignItems: 'center',
-    shadowColor: '#4CAF50',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    shadowColor: Brand.emerald500,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 3,
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  submitBtnText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+  submitBtnText: { color: '#fff', fontSize: 16, fontWeight: '800' },
   cancelBtn: {
-    backgroundColor: '#fff',
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: Brand.slate50,
+    paddingVertical: 15,
+    borderRadius: 14,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#F44336',
+    borderWidth: 1.5,
+    borderColor: Brand.slate200,
   },
-  cancelBtnText: {
-    color: '#F44336',
-    fontSize: 16,
-    fontWeight: 'bold',
-  }
+  cancelBtnText: { color: Brand.slate600, fontSize: 16, fontWeight: '700' },
 });

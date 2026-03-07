@@ -36,13 +36,17 @@ const AppContent = () => {
   );
 };
 
+import { ThemeProvider } from './src/context/ThemeContext';
+
 export default function App() {
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <AppContent />
-        <StatusBar style="auto" />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppContent />
+          <StatusBar style="auto" />
+        </AuthProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

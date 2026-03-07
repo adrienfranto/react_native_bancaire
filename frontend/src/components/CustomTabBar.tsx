@@ -2,22 +2,34 @@ import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { Brand } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
+
+type IconName = React.ComponentProps<typeof Ionicons>['name'];
+
+const TAB_ICONS: Record<string, { active: IconName; inactive: IconName }> = {
+  Dashboard: { active: 'bar-chart', inactive: 'bar-chart-outline' },
+  List: { active: 'wallet', inactive: 'wallet-outline' },
+  Profile: { active: 'person', inactive: 'person-outline' },
+};
+
+const TAB_LABELS: Record<string, string> = {
+  Dashboard: 'Tableau',
+  List: 'Prêts',
+  Profile: 'Profil',
+};
 
 export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
   const insets = useSafeAreaInsets();
+  const { theme, isDarkMode } = useTheme();
 
   return (
-    <View style={[styles.tabBar, { paddingBottom: insets.bottom + 10 }]}>
+    <View style={[styles.tabBar, { paddingBottom: insets.bottom + 8, backgroundColor: theme.card, borderTopColor: theme.border }]}>
       {state.routes.map((route, index) => {
-        const { options } = descriptors[route.key];
-        const label =
-          options.tabBarLabel !== undefined
-            ? options.tabBarLabel
-            : options.title !== undefined
-            ? options.title
-            : route.name;
-
         const isFocused = state.index === index;
+        const icons = TAB_ICONS[route.name] || { active: 'ellipse', inactive: 'ellipse-outline' };
+        const label = TAB_LABELS[route.name] || route.name;
 
         const onPress = () => {
           const event = navigation.emit({
@@ -25,17 +37,9 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
             target: route.key,
             canPreventDefault: true,
           });
-
           if (!isFocused && !event.defaultPrevented) {
             navigation.navigate(route.name);
           }
-        };
-
-        const onLongPress = () => {
-          navigation.emit({
-            type: 'tabLongPress',
-            target: route.key,
-          });
         };
 
         return (
@@ -43,14 +47,19 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
             key={route.key}
             accessibilityRole="button"
             accessibilityState={isFocused ? { selected: true } : {}}
-            accessibilityLabel={options.tabBarAccessibilityLabel}
-            testID={(options as any).tabBarTestID}
             onPress={onPress}
-            onLongPress={onLongPress}
-            style={[styles.tabItem, isFocused && styles.tabItemFocused]}
+            style={styles.tabItem}
+            activeOpacity={0.7}
           >
-            <Text style={[styles.tabText, isFocused && styles.tabTextFocused]}>
-              {label as string}
+            <View style={[styles.iconPill, isFocused && { backgroundColor: theme.primaryLight }]}>
+              <Ionicons
+                name={isFocused ? icons.active : icons.inactive}
+                size={22}
+                color={isFocused ? theme.primary : theme.textMuted}
+              />
+            </View>
+            <Text style={[styles.tabText, isFocused ? { color: theme.primary, fontWeight: '700' } : { color: theme.textMuted }]}>
+              {label}
             </Text>
           </TouchableOpacity>
         );
@@ -62,36 +71,45 @@ export const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, 
 const styles = StyleSheet.create({
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: '#ffffff',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
+    backgroundColor: 'transparent',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     position: 'absolute',
     bottom: 0,
     width: '100%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 10,
-    paddingTop: 15,
+    shadowColor: Brand.slate900,
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 20,
+    elevation: 20,
+    paddingTop: 12,
     justifyContent: 'space-around',
     alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: 'transparent',
   },
   tabItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
+    alignItems: 'center',
+    paddingHorizontal: 10,
   },
-  tabItemFocused: {
-    backgroundColor: '#ECFDF5', // Emerald 50
+  iconPill: {
+    width: 48,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  iconPillActive: {
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
   },
   tabText: {
-    color: '#94A3B8', // Slate 400
+    color: Brand.slate400,
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: 11,
   },
   tabTextFocused: {
-    color: '#10B981', // Emerald 500
-    fontWeight: 'bold',
+    color: Brand.emerald500,
+    fontWeight: '700',
   },
 });
