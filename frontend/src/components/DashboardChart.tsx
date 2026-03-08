@@ -67,7 +67,7 @@ export const DashboardChart: React.FC<Props> = ({ total, min, max }) => {
   ];
 
   const fmt = (n: number) =>
-    n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+    n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' Ar';
 
   return (
     <View style={[styles.container, { backgroundColor: theme.card, shadowColor: isDarkMode ? '#000' : Brand.slate900 }]}>
@@ -134,14 +134,14 @@ export const DashboardChart: React.FC<Props> = ({ total, min, max }) => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: Brand.slate50,
-    borderRadius: 20,
-    padding: 16,
-    marginTop: 4,
+    borderRadius: 24,
+    padding: 20,
+    marginTop: 10,
     shadowColor: Brand.slate900,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.05,
-    shadowRadius: 15,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
     borderWidth: 1,
     borderColor: Brand.slate200,
   },
@@ -198,15 +198,15 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   kpiLabel: {
-    fontSize: 8,
+    fontSize: 10,
     fontWeight: '800',
     color: Brand.slate400,
     textTransform: 'uppercase',
     letterSpacing: 0.6,
-    marginBottom: 2,
+    marginBottom: 4,
   },
   kpiValue: {
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: '900',
     letterSpacing: -0.4,
   },

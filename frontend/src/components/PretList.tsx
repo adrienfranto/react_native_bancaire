@@ -105,7 +105,7 @@ const AnimatedListItem: React.FC<ListItemProps> = ({ item, index, onEdit, onDele
           <View style={[styles.infoSeparator, { backgroundColor: theme.border }]} />
           <View style={styles.infoItem}>
             <Text style={[styles.infoLabel, { color: theme.textMuted }]}>Montant Initial</Text>
-            <Text style={[styles.infoValue, { color: theme.textPrimary }]}>{item.montant.toLocaleString('fr-FR')} €</Text>
+            <Text style={[styles.infoValue, { color: theme.textPrimary }]}>{item.montant.toLocaleString('fr-FR')} Ar</Text>
           </View>
           <View style={[styles.infoSeparator, { backgroundColor: theme.border }]} />
           <View style={styles.infoItem}>
@@ -118,7 +118,7 @@ const AnimatedListItem: React.FC<ListItemProps> = ({ item, index, onEdit, onDele
       {/* Footer: Montant à payer */}
       <View style={[styles.footer, { backgroundColor: isDarkMode ? 'rgba(16, 185, 129, 0.08)' : 'rgba(16, 185, 129, 0.05)', borderColor: isDarkMode ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.15)' }]}>
         <Text style={[styles.footerLabel, { color: theme.primary }]}>MONTANT À REBOURSER (CAPITAL + INTÉRÊTS)</Text>
-        <Text style={[styles.footerValue, { color: theme.primary }]}>{aPayer.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €</Text>
+        <Text style={[styles.footerValue, { color: theme.primary }]}>{aPayer.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Ar</Text>
       </View>
 
       {/* Actions */}
@@ -145,29 +145,29 @@ export const PretList: React.FC<Props> = ({ prets, onEdit, onDelete }) => {
   const renderFooter = () => {
     if (prets.length === 0) return null;
     return (
-      <View style={[styles.footerSummary, { backgroundColor: isDarkMode ? theme.card : theme.gradientStart }]}>
+      <View style={[styles.footerSummary, { backgroundColor: isDarkMode ? theme.card : theme.backgroundAlt, borderColor: isDarkMode ? 'transparent' : theme.border, borderWidth: isDarkMode ? 0 : 1 }]}>
         <View style={styles.summaryHeader}>
           <Ionicons name="stats-chart" size={20} color={theme.primary} />
-          <Text style={styles.summaryTitle}>Bilan Global des Prêts</Text>
+          <Text style={[styles.summaryTitle, { color: theme.textPrimary }]}>Bilan Global des Prêts</Text>
         </View>
         
         <View style={styles.summaryGrid}>
-          <View style={[styles.summaryItem, { backgroundColor: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.05)', borderColor: isDarkMode ? theme.border : 'rgba(255,255,255,0.1)' }]}>
-            <Text style={[styles.summaryLabel, { color: isDarkMode ? theme.textSecondary : Brand.slate400 }]}>Total à rembourser</Text>
+          <View style={[styles.summaryItem, { backgroundColor: isDarkMode ? 'rgba(255,255,255,0.03)' : theme.card, borderColor: isDarkMode ? theme.border : theme.border }]}>
+            <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>Total à rembourser</Text>
             <Text style={[styles.summaryValue, { color: theme.danger }]}>
-              {totals.total.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
+              {totals.total.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} Ar
             </Text>
           </View>
           
-          <View style={[styles.summarySubGrid, { backgroundColor: isDarkMode ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.03)' }]}>
+          <View style={[styles.summarySubGrid, { backgroundColor: isDarkMode ? 'rgba(0,0,0,0.2)' : theme.background, borderColor: theme.border, borderWidth: isDarkMode ? 0 : 1 }]}>
             <View style={styles.summaryItemSmall}>
-              <Text style={[styles.summaryLabelSmall, { color: isDarkMode ? theme.textMuted : Brand.slate500 }]}>Minimum</Text>
-              <Text style={styles.summaryValueSmall}>{totals.min.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €</Text>
+              <Text style={[styles.summaryLabelSmall, { color: theme.textMuted }]}>Minimum</Text>
+              <Text style={[styles.summaryValueSmall, { color: theme.textPrimary }]}>{totals.min.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} Ar</Text>
             </View>
-            <View style={[styles.summarySeparator, { backgroundColor: isDarkMode ? theme.border : 'rgba(255,255,255,0.1)' }]} />
+            <View style={[styles.summarySeparator, { backgroundColor: theme.border }]} />
             <View style={styles.summaryItemSmall}>
-              <Text style={[styles.summaryLabelSmall, { color: isDarkMode ? theme.textMuted : Brand.slate500 }]}>Maximum</Text>
-              <Text style={styles.summaryValueSmall}>{totals.max.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €</Text>
+              <Text style={[styles.summaryLabelSmall, { color: theme.textMuted }]}>Maximum</Text>
+              <Text style={[styles.summaryValueSmall, { color: theme.textPrimary }]}>{totals.max.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} Ar</Text>
             </View>
           </View>
         </View>

@@ -134,7 +134,7 @@ export const PretForm: React.FC<Props> = ({ onAdd, onUpdate, pretToEdit, onCance
 
         <View style={styles.row}>
           <View style={{ flex: 1, marginRight: 10 }}>
-            <FormField label="Montant (€)" icon="cash-outline">
+            <FormField label="Montant (Ar)" icon="cash-outline">
               <TextInput
                 style={[styles.input, { backgroundColor: theme.backgroundAlt, borderColor: theme.border, color: theme.textPrimary }]}
                 placeholder="10 000"

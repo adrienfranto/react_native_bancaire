@@ -17,10 +17,10 @@ export const DashboardScreen: React.FC = () => {
   const { isDarkMode, theme } = useTheme();
 
   const isWeb = Platform.OS === 'web';
-  const fadeAnim = useRef(new Animated.Value(isWeb ? 1 : 0)).current;
-  const slideAnim = useRef(new Animated.Value(isWeb ? 0 : 15)).current;
-  const scaleAnim = useRef(new Animated.Value(isWeb ? 1 : 0.95)).current;
-  const chartFadeAnim = useRef(new Animated.Value(isWeb ? 1 : 0)).current;
+  const fadeAnim = useRef(new Animated.Value(isWeb ? 1 : 1)).current; // Default to 1 for visibility
+  const slideAnim = useRef(new Animated.Value(isWeb ? 0 : 0)).current;  // Default to 0
+  const scaleAnim = useRef(new Animated.Value(isWeb ? 1 : 1)).current;  // Default to 1
+  const chartFadeAnim = useRef(new Animated.Value(isWeb ? 1 : 1)).current; // Default to 1
 
   useEffect(() => {
     if (isWeb) return; // Skip animations on web for instant visibility
@@ -112,52 +112,30 @@ export const DashboardScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Balance Card Overlap - No animation for web for stability */}
-          {isWeb ? (
-            <View style={[
-              styles.balanceCard,
-              {
-                backgroundColor: isDarkMode ? 'rgba(16, 185, 129, 0.25)' : 'rgba(16, 185, 129, 0.95)',
-                borderColor: isDarkMode ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.6)',
-                bottom: -40,
-              }
-            ]}>
-              <View style={styles.balanceInfo}>
-                <Text style={styles.balanceLabel}>Total des dettes</Text>
-                <Text style={styles.balanceValue}>{total.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €</Text>
-              </View>
-              <View style={styles.balanceAction}>
-                <TouchableOpacity style={styles.detailsBtn}>
-                  <Text style={styles.detailsBtnText}>Détails</Text>
-                  <Ionicons name="chevron-forward" size={12} color="#fff" />
-                </TouchableOpacity>
-              </View>
+          {/* Balance Card Overlap */}
+          <Animated.View style={[
+            styles.balanceCard,
+            {
+              opacity: fadeAnim,
+              transform: [
+                { translateY: slideAnim },
+                { scale: scaleAnim }
+              ],
+              backgroundColor: isDarkMode ? 'rgba(16, 185, 129, 0.25)' : 'rgba(16, 185, 129, 0.95)',
+              borderColor: isDarkMode ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.6)',
+            }
+          ]}>
+            <View style={styles.balanceInfo}>
+              <Text style={styles.balanceLabel}>Total des dettes</Text>
+              <Text style={styles.balanceValue}>{total.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} Ar</Text>
             </View>
-          ) : (
-            <Animated.View style={[
-              styles.balanceCard,
-              {
-                opacity: fadeAnim,
-                transform: [
-                  { translateY: slideAnim },
-                  { scale: scaleAnim }
-                ],
-                backgroundColor: isDarkMode ? 'rgba(16, 185, 129, 0.25)' : 'rgba(16, 185, 129, 0.85)',
-                borderColor: isDarkMode ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.4)',
-              }
-            ]}>
-              <View style={styles.balanceInfo}>
-                <Text style={styles.balanceLabel}>Total des dettes</Text>
-                <Text style={styles.balanceValue}>{total.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €</Text>
-              </View>
-              <View style={styles.balanceAction}>
-                <TouchableOpacity style={styles.detailsBtn}>
-                  <Text style={styles.detailsBtnText}>Détails</Text>
-                  <Ionicons name="chevron-forward" size={12} color="#fff" />
-                </TouchableOpacity>
-              </View>
-            </Animated.View>
-          )}
+            <View style={styles.balanceAction}>
+              <TouchableOpacity style={styles.detailsBtn}>
+                <Text style={styles.detailsBtnText}>Détails</Text>
+                <Ionicons name="chevron-forward" size={12} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
         </SafeAreaView>
       </LinearGradient>
 
@@ -202,12 +180,13 @@ const styles = StyleSheet.create({
     backgroundColor: Brand.slate50,
   },
   headerBackground: {
-    paddingTop: Platform.OS === 'ios' ? 10 : 30,
-    paddingBottom: 30, // Reduced significantly as card is now inside
+    paddingTop: Platform.OS === 'ios' ? 10 : 20,
+    paddingBottom: 40, 
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
     position: 'relative',
     zIndex: 10,
+    overflow: 'visible', // Ensure overlap is visible
   },
   content: {
     padding: 16,
@@ -278,9 +257,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
   },
   balanceCard: {
-    backgroundColor: 'rgba(16, 185, 129, 0.9)', 
+    backgroundColor: 'rgba(16, 185, 129, 0.95)', 
     marginHorizontal: 20,
-    borderRadius: 30,
+    borderRadius: 24,
     padding: 24,
     flexDirection: 'row',
     alignItems: 'center',
@@ -289,10 +268,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.3,
     shadowRadius: 24,
-    elevation: 15,
+    elevation: 8,
     borderColor: 'rgba(255,255,255,0.3)',
+    borderWidth: 1,
     zIndex: 20,
-   top: 10 // Added margin to separate from status text
+    marginBottom: -20, // Use negative margin for overlap instead of top/bottom
   },
   balanceInfo: {
     
@@ -326,7 +306,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   scrollContent: {
-    paddingTop: 20, // Reduced as there is no overlap
+    paddingTop: 60, // Space for the overlapping card
     paddingBottom: 110,
     zIndex: 1,
   },
