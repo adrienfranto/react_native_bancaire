@@ -9,15 +9,15 @@ import { Platform } from 'react-native';
 import { Brand } from '../theme/colors';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../context/ThemeContext';
+import { BASE_URL } from '../services/api';
 
-const API_BASE_URL = Platform.OS === 'android' ? 'http://10.0.2.2:8000' : 'http://localhost:8000';
 
 export const ProfileScreen: React.FC = () => {
   const { user, logout } = useAuth();
   const { isDarkMode, toggleTheme, theme } = useTheme();
   const [uploading, setUploading] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(
-    user?.photo_profil_url ? `${API_BASE_URL}${user.photo_profil_url}` : null
+    user?.photo_profil_url ? `${BASE_URL}${user.photo_profil_url}` : null
   );
 
   const pickImage = async () => {
@@ -58,7 +58,7 @@ export const ProfileScreen: React.FC = () => {
         formData.append('file', { uri, name: filename, type: 'image/jpeg' });
       }
 
-      const response = await fetch(`${API_BASE_URL}/users/${user.id}/upload-profile-image`, {
+    const response = await fetch(`${BASE_URL}/users/${user.id}/upload-profile-image`, {
         method: 'POST',
         body: formData,
       });
@@ -69,7 +69,7 @@ export const ProfileScreen: React.FC = () => {
       }
 
       const data = await response.json();
-      setProfileImageUrl(`${API_BASE_URL}${data.photo_profil_url}?t=${Date.now()}`);
+      setProfileImageUrl(`${BASE_URL}${data.photo_profil_url}?t=${Date.now()}`);
       Alert.alert('✅ Succès', 'Photo de profil mise à jour !');
     } catch (error: any) {
       Alert.alert('Erreur upload', error.message || "L'upload a échoué.");

@@ -9,6 +9,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { ActivityIndicator } from 'react-native';
+import { BASE_URL } from '../services/api';
 
 export const DashboardScreen: React.FC = () => {
   const { prets, loading, error } = useContext(PretContext);
@@ -71,7 +72,6 @@ export const DashboardScreen: React.FC = () => {
   }
 
   const { total, min, max } = calculateTotals(prets);
-  const API_BASE_URL = Platform.OS === 'android' ? 'http://10.0.2.2:8000' : 'http://localhost:8000';
 
   const dynamicStyles = {
     container: { backgroundColor: theme.background },
@@ -101,7 +101,7 @@ export const DashboardScreen: React.FC = () => {
             <TouchableOpacity style={styles.avatarWrapper}>
               {user?.photo_profil_url ? (
                 <Image 
-                  source={{ uri: `${API_BASE_URL}${user.photo_profil_url}` }} 
+                  source={{ uri: `${BASE_URL}${user.photo_profil_url}` }} 
                   style={styles.avatar} 
                 />
               ) : (
